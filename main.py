@@ -10,19 +10,25 @@ pygame.display.set_caption("Universe")
 done = False
 clock = pygame.time.Clock()
 
-g = Galaxy(size, ammount=0)
+g = Galaxy(size)
 
-sol = Body(pos=(700, 300), radius=60, mass=1000, color=(200,250,20), static=True)
-marte = Body(pos=(400, 300), radius=13, mass=15, color=(200,50,20))
-terra = Body(pos=(850, 300), radius=15, mass=20, color=(20,50,200))
-lua = Body(pos=(880, 300), radius=5, mass=5, color=(50,50,50))
+center = (int(size[0] / 2), int(size[1] / 2))
 
-g.add([sol, marte, terra, lua])
+sol = Body(pos=center, radius=695500, mass=1.98892*10**30, color=(250, 200, 20))
+terra = Body(pos=center, radius=6371, mass=5.9742*10**24, color=(50, 50, 200))
+lua = Body(pos=center, radius=1737, mass=7.36*10**22, color=(50,50,50))
+marte = Body(pos=center, radius=3390, mass=6.39*10**23, color=(200, 50, 50))
 
-marte.orbit(sol)
+terra.set_distance_to(sol, 149600000)
+lua.set_distance_to(terra, 384400)
+marte.set_distance_to(sol, 227900000)
+
 terra.orbit(sol)
 lua.orbit(terra)
 lua.orbit(sol)
+marte.orbit(sol)
+
+g.add(sol, terra, lua, marte)
 
 while not done:
     for event in pygame.event.get():
@@ -33,7 +39,7 @@ while not done:
     screen.fill((0, 0, 0))
 
     g.draw(screen)
-    g.step(5)
+    g.step()
 
     pygame.display.flip()
 
