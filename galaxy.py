@@ -7,9 +7,13 @@ G = 6.67408 * 10**-11
 
 SCALE = 10**6
 
-pixels_to_km = lambda x: int(x * SCALE)
 
-km_to_pixels = lambda x: int(x / SCALE)
+def px_to_km(x):
+    return int(x * SCALE)
+
+
+def km_to_px(x):
+    return int(x / SCALE)
 
 
 class Galaxy:
@@ -21,14 +25,10 @@ class Galaxy:
     def add_random(pos=None, mass_range=(5, 25), radius_range=(5, 25)):
         if not pos:
             pos = (randint(0, self.size[0]), randint(0, self.size[1]))
-        self.add(
-            Body(
-                pos,
-                randint(*radius_range),
-                uniform(*mass_range),
-                color=(randint(0, 255), randint(0, 255), randint(0, 255))
-            )
-        )
+
+        b = Body(pos, randint(*radius_range), uniform(*mass_range),
+                 color=(randint(0, 255), randint(0, 255), randint(0, 255)))
+        self.add(b)
 
     def add(self, *args):
         for b in args:
@@ -53,7 +53,7 @@ class Galaxy:
             self.add_forces()
             for b1 in self.bodies:
                 b1.step()
-                for b2 in self.bodies:
+                # for b2 in self.bodies:
                     # self.test_collision(b1, b2)
 
     def draw(self, screen):
@@ -63,7 +63,7 @@ class Galaxy:
     def test_collision(self, b1, b2):
         if b1 is not b2:
             r = b2.pos - b1.pos
-            d = km_to_pixels(np.sqrt(r.dot(r)))
+            d = km_to_px(np.sqrt(r.dot(r)))
             r1 = int(log(b1.radius)*8-50)
             r2 = int(log(b2.radius)*8-50)
             if d < r1+r2:
@@ -82,8 +82,9 @@ class Galaxy:
 
 class Body:
 
-    def __init__(self, pos, radius, mass, initial_speed=(0., 0.), color=(255, 255, 255), static=False):
-        self.pos = np.array([pixels_to_km(pos[0]), pixels_to_km(pos[1])]).astype(float)
+    def __init__(self, pos, radius, mass, initial_speed=(0., 0.),
+                 color=(255, 255, 255), static=False):
+        self.pos = np.array([px_to_km(pos[0]), px_to_km(pos[1])]).astype(float)
         self.radius = radius
         self.mass = mass
         self.color = color
@@ -104,7 +105,7 @@ class Body:
             self.speed += self.acceleration
 
     def draw(self, screen):
-        pixel_pos = [int(km_to_pixels(p)) for p in self.pos]
+        pixel_pos = [int(km_to_px(p)) for p in self.pos]
         pixel_radius = int(log(self.radius)*8-50)
         gfxdraw.filled_circle(screen, *pixel_pos, pixel_radius, self.color)
         gfxdraw.aacircle(screen, *pixel_pos, pixel_radius, self.color)
@@ -114,7 +115,7 @@ class Body:
         d = sqrt(r.dot(r))
         if d != 0:
             self.acceleration = np.array([0., 0.])
-            self.speed += sqrt(G * body.mass / d**3) * np.array([-r[1], r[0]])*1.1
+            self.speed += sqrt(G * body.mass / d**3) * np.array([-r[1], r[0]])*1.2
 
     def distance_to(self, body):
         r = body.pos - self.pos
